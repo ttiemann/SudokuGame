@@ -1,6 +1,7 @@
 #include "SudokuGrid.h"
-
 #include <iostream>
+#include <algorithm>
+#include <random>
 
 using std::vector;
 
@@ -17,7 +18,7 @@ void SudokuGrid::GeneratePuzzle()
 
 bool SudokuGrid::Validate() const
 {
-    // Validate rows
+    // Validate rows, columns, and subgrids
     for (int i = 0; i < SIZE; ++i)
     {
         std::vector<bool> rowCheck(SIZE + 1, false);
@@ -45,14 +46,14 @@ bool SudokuGrid::Validate() const
                 colCheck[grid[j][i]] = true;
             }
 
-            // Check 3x3 subgrid (box)
+            // Check subgrid
             int boxRow = 3 * (i / 3) + j / 3;
             int boxCol = 3 * (i % 3) + j % 3;
             if (grid[boxRow][boxCol] != 0)
             {
                 if (boxCheck[grid[boxRow][boxCol]])
                 {
-                    return false; // Duplicate found in 3x3 subgrid
+                    return false; // Duplicate found in subgrid
                 }
                 boxCheck[grid[boxRow][boxCol]] = true;
             }
@@ -78,21 +79,20 @@ bool SudokuGrid::IsValidPlacement(int row, int col, int num) const
 
 bool SudokuGrid::Solve()
 {
-    auto row = 0;
-    auto col = 0;
+    int row = 0;
+    int col = 0;
     if (!FindEmptyLocation(row, col))
     {
         return true; // Puzzle solved
     }
 
     vector<int> nums(SIZE);
-    auto value = 1;
-    std::generate(nums.begin(), nums.end(), [&value]()
-                  { return value++; });
+    int value = 1;
+    std::iota(nums.begin(), nums.end(), value);
 
     std::shuffle(nums.begin(), nums.end(), rng); // Randomize numbers to try
 
-    for (auto num : nums)
+    for (int num : nums)
     {
         if (IsSafe(row, col, num))
         {
@@ -116,11 +116,11 @@ bool SudokuGrid::FillGrid()
 
 void SudokuGrid::RemoveNumbers(int count)
 {
-    auto removed = 0;
+    int removed = 0;
     while (removed < count)
     {
-        auto i = dist(rng);
-        auto j = dist(rng);
+        int i = dist(rng);
+        int j = dist(rng);
         if (grid[i][j] != 0)
         {
             grid[i][j] = 0;
@@ -131,22 +131,32 @@ void SudokuGrid::RemoveNumbers(int count)
 
 bool SudokuGrid::IsSafe(int row, int col, int num) const
 {
-    // Check row, column, and 3x3 box for the number
-    for (auto x = 0; x < SIZE; x++)
+    // Check row for the number
+    for (int x = 0; x < SIZE; x++)
     {
-        if (grid[row][x] == num || grid[x][col] == num)
+        if (grid[row][x] == num)
         {
             return false;
         }
     }
 
-    auto startRow = row - row % 3;
-    auto startCol = col - col % 3;
-    for (auto r = 0; r < 3; r++)
+    // Check column for the number
+    for (int y = 0; y < SIZE; y++)
     {
-        for (auto d = 0; d < 3; d++)
+        if (grid[y][col] == num)
         {
-            if (grid[r + startRow][d + startCol] == num)
+            return false;
+        }
+    }
+
+    // Check subgrid for the number
+    int startRow = row - row % 3;
+    int startCol = col - col % 3;
+    for (int r = 0; r < 3; r++)
+    {
+        for (int c = 0; c < 3; c++)
+        {
+            if (grid[r + startRow][c + startCol] == num)
             {
                 return false;
             }
@@ -158,12 +168,14 @@ bool SudokuGrid::IsSafe(int row, int col, int num) const
 
 bool SudokuGrid::FindEmptyLocation(int &row, int &col) const
 {
-    for (row = 0; row < SIZE; row++)
+    for (int r = 0; r < SIZE; r++)
     {
-        for (col = 0; col < SIZE; col++)
+        for (int c = 0; c < SIZE; c++)
         {
-            if (grid[row][col] == 0)
+            if (grid[r][c] == 0)
             {
+                row = r;
+                col = c;
                 return true;
             }
         }
@@ -175,7 +187,7 @@ void SudokuGrid::PrintBoard() const
 {
     for (const auto &row : grid)
     {
-        for (auto cell : row)
+        for (int cell : row)
         {
             std::cout << cell << " ";
         }
