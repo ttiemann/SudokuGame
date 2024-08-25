@@ -7,6 +7,7 @@ class SudokuGrid
 {
 public:
     SudokuGrid();
+    ~SudokuGrid() = default;
 
     void GeneratePuzzle();
     bool Validate() const;
@@ -15,9 +16,9 @@ public:
 
     void PrintBoard() const;
 
-private:
     static constexpr int SIZE = 9; // Size of Sudoku grid (9x9)
 
+private:
     std::vector<std::vector<int>> grid;
 
     bool IsValidPlacement(int row, int col, int num) const;
