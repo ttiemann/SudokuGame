@@ -1,14 +1,11 @@
-#include <cstdio>
-#include <iostream>
+#include <QApplication>
 
-#include "SudokuGrid.h"
+#include "SudokuWindow.h"
 
 int main(int argc, char *argv[])
 {
-    printf("Hello, from Sudoku!\n");
-
-    SudokuGrid sudoku;
-    sudoku.GeneratePuzzle();
-
-    sudoku.PrintBoard();
+    QApplication app(argc, argv);
+    SudokuWindow window;
+    window.show();
+    return app.exec();
 }
