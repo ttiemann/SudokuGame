@@ -6,7 +6,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find the Qt6 libraries
-set(CMAKE_PREFIX_PATH "/Users/Timo/Qt/6.7.2/macos")
+if(APPLE)
+    set(CMAKE_PREFIX_PATH "/Users/Timo/Qt/6.7.2/macos")
+endif()
+
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
 set(CMAKE_AUTOMOC ON)
